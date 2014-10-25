@@ -17,7 +17,7 @@ namespace SampleApp.Controllers
         [HttpGet]
         public async Task<ActionResult> Index()
         {
-            // this verifies that we have a prtial signin from idsvr
+            // this verifies that we have a partial signin from idsvr
             var ctx = Request.GetOwinContext();
             var authentication = await ctx.Authentication.AuthenticateAsync(Constants.PartialSignInAuthenticationType);
             if (authentication == null)

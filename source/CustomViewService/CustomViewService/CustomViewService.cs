@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Thinktecture.IdentityServer.Core.Authentication;
 using Thinktecture.IdentityServer.Core.Services;
 using Thinktecture.IdentityServer.Core.Views;
 
@@ -13,9 +14,16 @@ namespace SampleApp
 {
     public class CustomViewService : IViewService
     {
-        public virtual Task<System.IO.Stream> Login(IDictionary<string, object> env, LoginViewModel model)
+        IClientStore clientStore;
+        public CustomViewService(IClientStore clientStore)
         {
-            return Render(model, "login");
+            this.clientStore = clientStore;
+        }
+
+        public virtual async Task<System.IO.Stream> Login(IDictionary<string, object> env, LoginViewModel model, SignInMessage message)
+        {
+            var client = await clientStore.FindClientByIdAsync(message.ClientId);
+            return await Render(model, "login", client.ClientName);
         }
 
         public virtual Task<System.IO.Stream> Logout(IDictionary<string, object> env, LogoutViewModel model)
@@ -38,7 +46,7 @@ namespace SampleApp
             return Render(model, "error");
         }
 
-        protected virtual Task<System.IO.Stream> Render(CommonViewModel model, string page)
+        protected virtual Task<System.IO.Stream> Render(CommonViewModel model, string page, string clientName = null)
         {
             var json = Newtonsoft.Json.JsonConvert.SerializeObject(model, Newtonsoft.Json.Formatting.None, new Newtonsoft.Json.JsonSerializerSettings() { ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver() });
 
@@ -46,6 +54,7 @@ namespace SampleApp
             html = Replace(html, new {
                 siteName = model.SiteName,
                 model = json,
+                clientName = clientName
             });
             
             return Task.FromResult(StringToStream(html));
@@ -62,7 +71,12 @@ namespace SampleApp
         {
             foreach (var key in values.Keys)
             {
-                value = value.Replace("{" + key + "}", values[key].ToString());
+                var val = values[key];
+                val = val ?? String.Empty;
+                if (val != null)
+                {
+                    value = value.Replace("{" + key + "}", val.ToString());
+                }
             }
             return value;
         }

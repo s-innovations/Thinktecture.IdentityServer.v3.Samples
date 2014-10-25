@@ -1,8 +1,6 @@
 ﻿using Microsoft.Owin;
 using Owin;
 using System.IdentityModel.Tokens;
-using System.Linq;
-using Thinktecture.IdentityModel;
 using Thinktecture.IdentityModel.Owin.ScopeValidation;
 using Thinktecture.IdentityModel.Tokens;
 using Thinktecture.IdentityServer.v3.AccessTokenValidation;
@@ -18,13 +16,13 @@ namespace SampleAspNetWebApi
             JwtSecurityTokenHandler.InboundClaimTypeMap = ClaimMappings.None;
 
             // for self contained tokens
-            app.UseIdentitiyServerJwt(new JwtTokenValidationOptions
+            app.UseIdentityServerJwt(new JwtTokenValidationOptions
                 {
                     Authority = "http://localhost:3333/core"
                 });
 
             // for reference tokens
-            app.UseIdentitiyServerReferenceToken(new ReferenceTokenValidationOptions
+            app.UseIdentityServerReferenceToken(new ReferenceTokenValidationOptions
                 {
                     Authority = "http://localhost:3333/core"
                 });
